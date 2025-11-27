@@ -42,7 +42,7 @@ from physicsnemo.sym.utils.io import (
 )
 
 def read_wf_data(velocity_scale,pressure_scale):
-    path = "./data_lat.npy"
+    path = os.path.join(os.getcwd(), "../../data_lat.npy")
     print(path)
     ic = np.load(path).astype(np.float32)
     
