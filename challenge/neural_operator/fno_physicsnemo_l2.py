@@ -1,18 +1,18 @@
 """
 Level 2: AFNO Implementation using PhysicsNeMo Architecture
-Adaptive Fourier Neural Operator for 2D Poisson equation
+Adaptive Fourier Neural Operator for 2D Reaction-Diffusion equation
 
 This implementation uses PhysicsNeMo's AFNO architecture with adaptive frequency mixing.
 AFNO extends FNO with learnable frequency interactions and sparsity.
 
-Problem: Poisson Equation
-    Δu + f = 0 on [0,1] × [0,1] with periodic boundary conditions
+Problem: Reaction-Diffusion Equation
+    u - Δu = f on [0,1] × [0,1] with periodic boundary conditions
 
 Key Features:
     - Uses physicsnemo.sym AFNO architecture
     - Adaptive frequency mixing via token mixing
     - Patch-based processing for efficiency
-    - Production-ready implementation
+    - u and f naturally have similar scales (no normalization issues!)
 
 Reference:
     https://github.com/NVIDIA/physicsnemo-sym/tree/main/examples/darcy
@@ -20,6 +20,7 @@ Reference:
 
 import os
 import h5py
+import torch
 from hydra.utils import to_absolute_path
 
 import physicsnemo.sym
@@ -36,18 +37,10 @@ from physicsnemo.sym.solver import Solver
 from physicsnemo.sym.utils.io.plotter import GridValidatorPlotter
 
 
-def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
+def load_dataset(filename: str, input_keys: list, output_keys: list):
     """
-    Load Poisson equation dataset from HDF5 file.
-    
-    Args:
-        filename: Path to HDF5 file
-        input_keys: List of input key names
-        output_keys: List of output key names
-    
-    Returns:
-        invar: Dictionary with input variables
-        outvar: Dictionary with output variables
+    Load reaction-diffusion dataset from HDF5 file.
+    u and f naturally have similar scales due to the PDE structure.
     """
     if not os.path.exists(filename):
         raise FileNotFoundError(
@@ -56,11 +49,9 @@ def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
         )
     
     with h5py.File(filename, 'r') as hf:
-        # Load data
-        f_data = hf['f'][:]  # Source term
-        u_data = hf['u'][:]  # Solution
+        f_data = hf['f'][:]  # Source term (pre-normalized)
+        u_data = hf['u'][:]  # Solution (pre-normalized)
     
-    # Create input/output dictionaries
     invar = {input_keys[0]: f_data}
     outvar = {output_keys[0]: u_data}
     
@@ -92,64 +83,45 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     input_keys = [Key("f", scale=(f_mean, f_std))]
     output_keys = [Key("u", scale=(u_mean, u_std))]
     
-    # Load training data
-    print("\nLoading training data...")
-    invar_train, outvar_train = load_poisson_dataset(
-        train_file,
+    # Load data (same as Level 1)
+    invar_train, outvar_train = load_dataset(
+        FIXME, 
+        [k.name for k in input_keys],
+        [k.name for k in output_keys],
+    )
+    invar_test, outvar_test = load_dataset(
+        FIXME,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     
-    # Load test data
-    print("Loading test data...")
-    invar_test, outvar_test = load_poisson_dataset(
-        test_file,
-        [k.name for k in input_keys],
-        [k.name for k in output_keys],
-    )
-
-    # Get training image shape
+    # Get image shape
     img_shape = [
         next(iter(invar_train.values())).shape[-2],
         next(iter(invar_train.values())).shape[-1],
     ]
     
-    print(f"\nOriginal image shape: {img_shape}")
-
-    # Crop out some pixels so that img_shape is divisible by patch_size of AFNO
-    # AFNO uses patch-based processing, so dimensions must be divisible by patch_size
+    # AFNO requires dimensions divisible by patch_size
     img_shape = [s - s % cfg.arch.afno.patch_size for s in img_shape]
-    print(f"Cropped image shape (divisible by patch_size={cfg.arch.afno.patch_size}): {img_shape}")
+    print(f"Cropped image shape: {img_shape}")
     
-    # Apply cropping to all datasets
+    # Crop data to match
     for d in (invar_train, outvar_train, invar_test, outvar_test):
         for k in d:
-            d[k] = d[k][:, :, : img_shape[0], : img_shape[1]]
-            print(f"  {k}: {d[k].shape}")
-
-    # Make datasets
-    train_dataset = DictGridDataset(invar_train, outvar_train)
-    test_dataset = DictGridDataset(invar_test, outvar_test)
-
-    # Create AFNO model
-    print("\nCreating AFNO model...")
-    model = instantiate_arch(
-        input_keys=input_keys,
-        output_keys=output_keys,
-        cfg=cfg.arch.afno,
-        img_shape=img_shape,
-    )
-    nodes = [model.make_node(name="AFNO")]
+            d[k] = d[k][:, :, :img_shape[0], :img_shape[1]]
     
-    print(f"AFNO model created successfully")
-    print(f"  Input keys: {[k.name for k in input_keys]}")
-    print(f"  Output keys: {[k.name for k in output_keys]}")
-    print(f"  Image shape: {img_shape}")
+    # Create datasets (same as Level 1)
+    # Hint: use DictGridDataset
+    FIXME
+    
+    # Create AFNO model
+    # Hint: use instantiate_arch
+    FIXME
 
     # Make domain
     domain = Domain()
 
-    # Add supervised constraint (data-driven training)
+    # Add supervised constraint
     supervised = SupervisedGridConstraint(
         nodes=nodes,
         dataset=train_dataset,
@@ -166,14 +138,52 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     )
     domain.add_validator(val, "test")
 
-    # Make solver
+    # Make solver and train
     slv = Solver(cfg, domain)
-
-    # Start training
     print("\n" + "="*70)
-    print("Starting AFNO training for 2D Poisson Equation")
+    print("Starting AFNO training for 2D Reaction-Diffusion Equation")
     print("="*70)
     slv.solve()
+
+    # ============ Leaderboard Metrics ============
+    # Load the best model checkpoint
+    checkpoint_dir = slv.network_dir
+    checkpoint_path = os.path.join(checkpoint_dir, "AFNO.0.pth")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if os.path.exists(checkpoint_path):
+        model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        model.eval()
+    
+    # Prepare test data (already normalized and cropped)
+    f_test = torch.tensor(invar_test["f"], dtype=torch.float32, device=device)
+    u_true = torch.tensor(outvar_test["u"], dtype=torch.float32, device=device)
+    
+    # Get predictions
+    with torch.no_grad():
+        u_pred = model({"f": f_test})["u"]
+    
+    # Compute metrics
+    test_rmse = torch.sqrt(torch.mean((u_pred - u_true) ** 2)).item()
+    
+    print("\n" + "=" * 50)
+    print("         LEADERBOARD METRICS (Level 2 - AFNO)")
+    print("=" * 50)
+    print(f"  Test RMSE:          {test_rmse:.6e}")
+    print("=" * 50 + "\n")
+    
+    # Save metrics to CSV
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from utils_metrics import save_metrics_to_csv
+    
+    save_metrics_to_csv(
+        level="L2",
+        category="FNO",
+        metrics_dict={
+            "Test_RMSE": f"{test_rmse:.6e}"
+        },
+        csv_path=os.path.join(os.path.dirname(__file__), '../leaderboard_metrics.csv')
+    )
 
 
 if __name__ == "__main__":

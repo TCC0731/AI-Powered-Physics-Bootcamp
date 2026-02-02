@@ -1,19 +1,20 @@
 """
 Level 3: PINO Implementation using PhysicsNeMo Architecture
-Physics-Informed Neural Operator for 2D Poisson equation
+Physics-Informed Neural Operator for 2D Reaction-Diffusion equation
 
 This implementation combines data-driven learning with PDE constraints.
 PINO enforces physics laws during training for better generalization and 
 physical consistency.
 
-Problem: Poisson Equation
-    Δu + f = 0 on [0,1] × [0,1] with periodic boundary conditions
+Problem: Reaction-Diffusion Equation
+    u - Δu = f on [0,1] × [0,1] with periodic boundary conditions
 
 Key Features:
     - Uses physicsnemo.sym FNO architecture as backbone
-    - Adds physics loss: ||Δu + f||²
-    - Spectral Laplacian computation via FFT
+    - Adds physics loss: ||u - Δu - f||²
+    - Finite difference Laplacian computation
     - Combined data + physics training
+    - u and f naturally have similar scales (no normalization issues!)
 
 Benefits:
     - Better generalization with less data
@@ -25,14 +26,12 @@ Reference:
 """
 
 from typing import Dict
-import math
 import os
 import h5py
+import torch
 from hydra.utils import to_absolute_path
 
 import numpy as np
-import torch
-import torch.nn.functional as F
 
 import physicsnemo.sym
 from physicsnemo.sym.hydra import instantiate_arch, PhysicsNeMoConfig
@@ -47,18 +46,10 @@ from physicsnemo.sym.dataset import DictGridDataset
 from physicsnemo.sym.utils.io.plotter import GridValidatorPlotter
 
 
-def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
+def load_dataset(filename: str, input_keys: list, output_keys: list):
     """
-    Load Poisson equation dataset from HDF5 file.
-    
-    Args:
-        filename: Path to HDF5 file
-        input_keys: List of input key names
-        output_keys: List of output key names
-    
-    Returns:
-        invar: Dictionary with input variables
-        outvar: Dictionary with output variables
+    Load reaction-diffusion dataset from HDF5 file.
+    u and f naturally have similar scales due to the PDE structure.
     """
     if not os.path.exists(filename):
         raise FileNotFoundError(
@@ -67,11 +58,9 @@ def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
         )
     
     with h5py.File(filename, 'r') as hf:
-        # Load data
-        f_data = hf['f'][:]  # Source term
-        u_data = hf['u'][:]  # Solution
+        f_data = hf['f'][:]  # Source term (scaled)
+        u_data = hf['u'][:]  # Solution (scaled)
     
-    # Create input/output dictionaries
     invar = {input_keys[0]: f_data}
     outvar = {output_keys[0]: u_data}
     
@@ -79,88 +68,44 @@ def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
 
 
 # [pde-loss]
-class PoissonPDE(torch.nn.Module):
+class ReactionDiffusionPDE(torch.nn.Module):
     """
-    Custom Poisson PDE definition for PINO.
+    Reaction-Diffusion PDE for PINO.
     
-    Computes the PDE residual: Δu + f = 0
-    Using spectral derivatives for the Laplacian.
+    Computes the PDE residual: u - Δu - f = 0
+    Using finite difference for the Laplacian.
     """
 
-    def __init__(self, gradient_method: str = "fourier"):
+    def __init__(self, dx: float = 1.0/64):
         super().__init__()
-        self.gradient_method = str(gradient_method)
+        self.dx = dx
 
-    def spectral_laplacian(self, u: torch.Tensor) -> torch.Tensor:
+    def finite_diff_laplacian(self, u: torch.Tensor) -> torch.Tensor:
         """
-        Compute Δu via FFT under periodic boundary conditions.
-        
-        Uses: F(Δu) = -(k_x² + k_y²) F(u)
-        
-        Args:
-            u: (B, 1, N, M) - Batch of 2D fields
-        Returns:
-            lap_u: (B, 1, N, M) - Laplacian of u
+        Compute Δu using finite differences with periodic boundary.
+        Δu = (u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4*u_{i,j}) / dx²
         """
-        B, C, N, M = u.shape
+        # Periodic padding
+        u_pad = torch.nn.functional.pad(u, (1, 1, 1, 1), mode='circular')
         
-        # Create frequency grid
-        freq_x = torch.fft.fftfreq(N, d=1.0/N, device=u.device)
-        freq_y = torch.fft.fftfreq(M, d=1.0/M, device=u.device)
+        # Second derivatives
+        u_xx = (u_pad[:, :, 2:, 1:-1] - 2*u_pad[:, :, 1:-1, 1:-1] + u_pad[:, :, :-2, 1:-1]) / (self.dx**2)
+        u_yy = (u_pad[:, :, 1:-1, 2:] - 2*u_pad[:, :, 1:-1, 1:-1] + u_pad[:, :, 1:-1, :-2]) / (self.dx**2)
         
-        TWO_PI = 2.0 * math.pi
-        kx = (TWO_PI * freq_x).view(N, 1)
-        ky = (TWO_PI * freq_y).view(1, M)
-        
-        # Laplacian multiplier: -(k_x² + k_y²)
-        lap_multiplier = -(kx ** 2 + ky ** 2)
-        lap_multiplier = lap_multiplier.unsqueeze(0).unsqueeze(0)
-        
-        # Apply in frequency domain: FFT -> multiply -> inverse FFT
-        U = torch.fft.fftn(u, dim=(-2, -1))
-        lap_U = lap_multiplier * U
-        lap_u = torch.fft.ifftn(lap_U, dim=(-2, -1)).real
-        
-        return lap_u
+        return u_xx + u_yy
 
     def forward(self, input_var: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
-        """
-        Compute Poisson PDE residual: Δu + f
-        
-        Args:
-            input_var: Dictionary with "u" (solution) and "f" (source term)
-        Returns:
-            Dictionary with "poisson_residual"
-        """
-        # Get inputs
+        """Compute Reaction-Diffusion PDE residual: u - Δu - f = 0"""
         u = input_var["u"]
         f = input_var["f"]
-        
-        # Compute Laplacian
-        if self.gradient_method == "fourier":
-            lap_u = self.spectral_laplacian(u)
-        elif self.gradient_method == "exact":
-            # Use exact derivatives from PhysicsNeMo
-            lap_u = input_var["u__x__x"] + input_var["u__y__y"]
-        else:
-            raise ValueError(f"Gradient method {self.gradient_method} not supported.")
-        
-        # Compute PDE residual: Δu + f should be zero
-        poisson_residual = lap_u + f
-        
-        # Return residual
-        output_var = {
-            "poisson_residual": poisson_residual,
-        }
-        return output_var
 
+        FIXME # Fill in the computation of pde_residual
 
-# [pde-loss]
+        return {"pde_residual": pde_residual}
 
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_PINO")
 def run(cfg: PhysicsNeMoConfig) -> None:
-    # [datasets]
     # Use hydra.utils.to_absolute_path to convert relative paths to absolute
     # (Hydra changes cwd to outputs/ so relative paths need conversion)
     train_file = to_absolute_path("datasets/Poisson_Fourier/train.hdf5")
@@ -184,87 +129,47 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     input_keys = [Key("f", scale=(f_mean, f_std))]
     output_keys = [Key("u", scale=(u_mean, u_std))]
     
-    # Load training data
-    print("\nLoading training data...")
-    invar_train, outvar_train = load_poisson_dataset(
-        train_file,
+    # Load data (same as Level 1)
+    invar_train, outvar_train = load_dataset(
+        FIXME, 
+        [k.name for k in input_keys],
+        [k.name for k in output_keys],
+    )
+    invar_test, outvar_test = load_dataset(
+        FIXME,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     
-    # Load test data
-    print("Loading test data...")
-    invar_test, outvar_test = load_poisson_dataset(
-        test_file,
-        [k.name for k in input_keys],
-        [k.name for k in output_keys],
-    )
+    # Add PDE residual target (should be zero)
+    outvar_train["pde_residual"] = np.zeros_like(outvar_train["u"])
 
-    # Add additional constraining values for Poisson residual (should be zero)
-    outvar_train["poisson_residual"] = np.zeros_like(outvar_train["u"])
+    # Create datasets (same as Level 1)
+    # Hint: use DictGridDataset
+    FIXME
 
-    # Make datasets
-    train_dataset = DictGridDataset(invar_train, outvar_train)
-    test_dataset = DictGridDataset(invar_test, outvar_test)
-    
-    print("\nDataset shapes:")
-    for d, name in [(invar_train, "Train input"), (outvar_train, "Train output"),
-                     (invar_test, "Test input"), (outvar_test, "Test output")]:
-        for k in d:
-            print(f"  {name} '{k}': {d[k].shape}")
-    # [datasets]
-
-    # [init-model]
-    # Define FNO model as backbone for PINO
-    print("\nCreating PINO model (FNO backbone + physics loss)...")
-    decoder_net = instantiate_arch(
-        cfg=cfg.arch.decoder,
-        output_keys=output_keys,
-    )
-    fno = instantiate_arch(
-        cfg=cfg.arch.fno,
-        input_keys=input_keys,
-        decoder_net=decoder_net,
-    )
-    
-    # Optionally add exact gradients via PhysicsNeMo (if using exact method)
-    gradient_method = cfg.custom.get("gradient_method", "fourier")
-    if gradient_method == "exact":
-        derivatives = [
-            Key("u", derivatives=[Key("x")]),
-            Key("u", derivatives=[Key("y")]),
-            Key("u", derivatives=[Key("x"), Key("x")]),
-            Key("u", derivatives=[Key("y"), Key("y")]),
-        ]
-        fno.add_pino_gradients(
-            derivatives=derivatives,
-            domain_length=[1.0, 1.0],
-        )
+    # Create FNO backbone for PINO
+    # Hint: use instantiate_arch
+    FIXME
     
     print(f"FNO backbone created successfully")
-    print(f"  Gradient method: {gradient_method}")
-    # [init-model]
 
-    # [init-node]
-    # Make custom Poisson residual node for PINO
-    inputs = ["u", "f"]
-    if gradient_method == "exact":
-        inputs += ["u__x__x", "u__y__y"]
+    # Create PDE node for physics loss (finite difference Laplacian)
+    grid_size = invar_train["f"].shape[-1]  # Get grid size from data
+    dx = 1.0 / grid_size
     
-    poisson_node = Node(
-        inputs=inputs,
-        outputs=["poisson_residual"],
-        evaluate=PoissonPDE(gradient_method=gradient_method),
-        name="Poisson PDE Node",
+    pde_node = Node(
+        inputs=["u", "f"],
+        outputs=["pde_residual"],
+        evaluate=ReactionDiffusionPDE(dx=dx),
+        name="Reaction-Diffusion PDE Node",
     )
-    nodes = [fno.make_node("fno"), poisson_node]
+    nodes = [fno.make_node("fno"), pde_node]
     
     print(f"PINO nodes created:")
     print(f"  1. FNO (data-driven)")
-    print(f"  2. Poisson PDE (physics-informed)")
-    # [init-node]
+    print(f"  2. Reaction-Diffusion PDE (physics-informed)")
 
-    # [constraint]
     # Make domain
     domain = Domain()
 
@@ -278,8 +183,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     print(f"\nConstraints added:")
     print(f"  - Data loss: ||u_pred - u_true||²")
-    print(f"  - Physics loss: ||Δu_pred + f||²")
-    # [constraint]
+    print(f"  - Physics loss: ||u_pred - Δu_pred - f||²")
 
     # Add validator
     val = GridValidator(
@@ -287,18 +191,72 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         dataset=test_dataset,
         batch_size=cfg.batch_size.validation,
         plotter=GridValidatorPlotter(n_examples=5),
-        requires_grad=True,  # Need gradients for physics loss
+        requires_grad=True,
     )
     domain.add_validator(val, "test")
 
-    # Make solver
+    # Make solver and train
     slv = Solver(cfg, domain)
-
-    # Start training
     print("\n" + "="*70)
-    print("Starting PINO training for 2D Poisson Equation")
+    print("Starting PINO training for 2D Reaction-Diffusion Equation")
     print("="*70)
     slv.solve()
+
+    # ============ Leaderboard Metrics ============
+    # Load the best model checkpoint
+    checkpoint_dir = slv.network_dir
+    checkpoint_path = os.path.join(checkpoint_dir, "fno.0.pth")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if os.path.exists(checkpoint_path):
+        fno.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        fno.eval()
+    
+    # Prepare test data
+    f_test = torch.tensor(invar_test["f"], dtype=torch.float32, device=device)
+    u_true = torch.tensor(outvar_test["u"], dtype=torch.float32, device=device)
+    
+    # Get predictions
+    with torch.no_grad():
+        u_pred = fno({"f": f_test})["u"]
+    
+    # Compute Test RMSE
+    test_rmse = torch.sqrt(torch.mean((u_pred - u_true) ** 2)).item()
+    
+    # Compute PDE Residue: u - Δu - f = 0 (using finite difference)
+    def finite_diff_laplacian(u, dx):
+        u_pad = torch.nn.functional.pad(u, (1, 1, 1, 1), mode='circular')
+        u_xx = (u_pad[:, :, 2:, 1:-1] - 2*u_pad[:, :, 1:-1, 1:-1] + u_pad[:, :, :-2, 1:-1]) / (dx**2)
+        u_yy = (u_pad[:, :, 1:-1, 2:] - 2*u_pad[:, :, 1:-1, 1:-1] + u_pad[:, :, 1:-1, :-2]) / (dx**2)
+        return u_xx + u_yy
+    
+    with torch.no_grad():
+        grid_size = u_pred.shape[-1]
+        dx = 1.0 / grid_size
+        lap_u = finite_diff_laplacian(u_pred, dx)
+        pde_residue = u_pred - lap_u - f_test  # u - Δu - f = 0
+        pde_rmse = torch.sqrt(torch.mean(pde_residue ** 2)).item()
+    
+    print("\n" + "=" * 50)
+    print("         LEADERBOARD METRICS (Level 3 - PINO)")
+    print("=" * 50)
+    print(f"  Test RMSE:          {test_rmse:.6e}")
+    print(f"  PDE Residue (RMSE): {pde_rmse:.6e}")
+    print("=" * 50 + "\n")
+    
+    # Save metrics to CSV
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from utils_metrics import save_metrics_to_csv
+    
+    save_metrics_to_csv(
+        level="L3",
+        category="FNO",
+        metrics_dict={
+            "Test_RMSE": f"{test_rmse:.6e}",
+            "PDE_Residue_RMSE": f"{pde_rmse:.6e}"
+        },
+        csv_path=os.path.join(os.path.dirname(__file__), '../leaderboard_metrics.csv')
+    )
 
 
 if __name__ == "__main__":

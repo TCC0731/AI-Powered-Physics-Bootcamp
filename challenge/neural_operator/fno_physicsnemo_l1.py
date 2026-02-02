@@ -1,17 +1,17 @@
 """
 Level 1: FNO Implementation using PhysicsNeMo Architecture
-Complete solution for 2D Poisson equation using NVIDIA PhysicsNeMo's FNO
+Complete solution for 2D Reaction-Diffusion equation using NVIDIA PhysicsNeMo's FNO
 
 This implementation uses PhysicsNeMo's built-in FNO architecture (FNOArch),
 similar to the Darcy flow example in the PhysicsNeMo repository.
 
-Problem: Poisson Equation
-    Δu + f = 0 on [0,1] × [0,1] with periodic boundary conditions
+Problem: Reaction-Diffusion Equation
+    u - Δu = f on [0,1] × [0,1] with periodic boundary conditions
 
 Key Features:
     - Uses physicsnemo.sym.models.fno.FNOArch
     - Production-ready neural operator architecture
-    - Optimized for performance and scalability
+    - u and f naturally have similar scales (no normalization issues!)
     - Consistent with NVIDIA's neural operator research
 
 Reference:
@@ -20,7 +20,7 @@ Reference:
 
 import os
 import h5py
-import numpy as np
+import torch
 from hydra.utils import to_absolute_path
 
 import physicsnemo.sym
@@ -35,18 +35,10 @@ from physicsnemo.sym.dataset import DictGridDataset
 from physicsnemo.sym.utils.io.plotter import GridValidatorPlotter
 
 
-def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
+def load_dataset(filename: str, input_keys: list, output_keys: list):
     """
-    Load Poisson equation dataset from HDF5 file.
-    
-    Args:
-        filename: Path to HDF5 file
-        input_keys: List of input key names
-        output_keys: List of output key names
-    
-    Returns:
-        invar: Dictionary with input variables
-        outvar: Dictionary with output variables
+    Load reaction-diffusion dataset from HDF5 file.
+    u and f naturally have similar scales due to the PDE structure.
     """
     if not os.path.exists(filename):
         raise FileNotFoundError(
@@ -55,11 +47,9 @@ def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
         )
     
     with h5py.File(filename, 'r') as hf:
-        # Load data
-        f_data = hf['f'][:]  # Source term
-        u_data = hf['u'][:]  # Solution
+        f_data = hf['f'][:]  # Source term (pre-normalized)
+        u_data = hf['u'][:]  # Solution (pre-normalized)
     
-    # Create input/output dictionaries
     invar = {input_keys[0]: f_data}
     outvar = {output_keys[0]: u_data}
     
@@ -68,75 +58,34 @@ def load_poisson_dataset(filename: str, input_keys: list, output_keys: list):
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_FNO")
 def run(cfg: PhysicsNeMoConfig) -> None:
-    # Define input/output keys with normalization scales
-    # These scales are computed from the training data (run generate_data.py to see them)
-    # For now, we'll compute them dynamically
+    # Data paths
+    train_file = to_absolute_path("datasets/Reaction_Diffusion/train.hdf5")
+    test_file = to_absolute_path("datasets/Reaction_Diffusion/test.hdf5")
     
-    # Use hydra.utils.to_absolute_path to convert relative paths to absolute
-    # (Hydra changes cwd to outputs/ so relative paths need conversion)
-    train_file = to_absolute_path("datasets/Poisson_Fourier/train.hdf5")
-    test_file = to_absolute_path("datasets/Poisson_Fourier/test.hdf5")
+    # Define input/output keys (no normalization needed!)
+    input_keys = [Key("f")]
+    output_keys = [Key("u")]
     
-    # Load training data and compute statistics
-    with h5py.File(train_file, 'r') as hf:
-        f_train = hf['f'][:]
-        u_train = hf['u'][:]
-    
-    f_mean = float(f_train.mean())
-    f_std = float(f_train.std())
-    u_mean = float(u_train.mean())
-    u_std = float(u_train.std())
-    
-    print(f"\nComputed normalization statistics:")
-    print(f"  f: mean={f_mean:.6e}, std={f_std:.6e}")
-    print(f"  u: mean={u_mean:.6e}, std={u_std:.6e}")
-    
-    # Define keys with proper scaling
-    input_keys = [Key("f", scale=(f_mean, f_std))]
-    output_keys = [Key("u", scale=(u_mean, u_std))]
-    
-    # Load training data
-    print("\nLoading training data...")
-    invar_train, outvar_train = load_poisson_dataset(
-        train_file,
+    # Load data
+    invar_train, outvar_train = load_dataset(
+        FIXME, 
+        [k.name for k in input_keys],
+        [k.name for k in output_keys],
+    )
+    invar_test, outvar_test = load_dataset(
+        FIXME,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     
-    # Load test data
-    print("Loading test data...")
-    invar_test, outvar_test = load_poisson_dataset(
-        test_file,
-        [k.name for k in input_keys],
-        [k.name for k in output_keys],
-    )
-
-    # Make datasets
-    train_dataset = DictGridDataset(invar_train, outvar_train)
-    test_dataset = DictGridDataset(invar_test, outvar_test)
-
-    # Print out training/test data shapes
-    print("\nDataset shapes:")
-    for d, name in [(invar_train, "Train input"), (outvar_train, "Train output"),
-                     (invar_test, "Test input"), (outvar_test, "Test output")]:
-        for k in d:
-            print(f"  {name} '{k}': {d[k].shape}")
-
-    # Create FNO architecture
-    # Option 1: Using decoder network (more flexible)
-    print("\nCreating FNO model...")
-    decoder_net = instantiate_arch(
-        cfg=cfg.arch.decoder,
-        output_keys=output_keys,
-    )
-    fno = instantiate_arch(
-        cfg=cfg.arch.fno,
-        input_keys=input_keys,
-        decoder_net=decoder_net,
-    )
-    nodes = [fno.make_node("fno")]
+    # Create datasets
+    # Hint: use DictGridDataset
+    FIXME
     
-    # Print model info
+    # Create FNO model
+    # Hint: use instantiate_arch
+    FIXME
+    
     print(f"FNO model created successfully")
     print(f"  Input keys: {[k.name for k in input_keys]}")
     print(f"  Output keys: {[k.name for k in output_keys]}")
@@ -144,7 +93,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     # Make domain
     domain = Domain()
 
-    # Add supervised constraint (data-driven training)
+    # Add supervised constraint
     supervised = SupervisedGridConstraint(
         nodes=nodes,
         dataset=train_dataset,
@@ -161,14 +110,52 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     )
     domain.add_validator(val, "test")
 
-    # Make solver
+    # Make solver and train
     slv = Solver(cfg, domain)
-
-    # Start training
     print("\n" + "="*70)
-    print("Starting FNO training for 2D Poisson Equation")
+    print("Starting FNO training for 2D Reaction-Diffusion Equation")
     print("="*70)
     slv.solve()
+
+    # ============ Leaderboard Metrics ============
+    # Load the best model checkpoint
+    checkpoint_dir = slv.network_dir
+    checkpoint_path = os.path.join(checkpoint_dir, "fno.0.pth")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if os.path.exists(checkpoint_path):
+        fno.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        fno.eval()
+    
+    # Prepare test data (already normalized)
+    f_test = torch.tensor(invar_test["f"], dtype=torch.float32, device=device)
+    u_true = torch.tensor(outvar_test["u"], dtype=torch.float32, device=device)
+    
+    # Get predictions
+    with torch.no_grad():
+        u_pred = fno({"f": f_test})["u"]
+    
+    # Compute metrics
+    test_rmse = torch.sqrt(torch.mean((u_pred - u_true) ** 2)).item()
+    
+    print("\n" + "=" * 50)
+    print("         LEADERBOARD METRICS (Level 1 - FNO)")
+    print("=" * 50)
+    print(f"  Test RMSE:          {test_rmse:.6e}")
+    print("=" * 50 + "\n")
+    
+    # Save metrics to CSV
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+    from utils_metrics import save_metrics_to_csv
+    
+    save_metrics_to_csv(
+        level="L1",
+        category="FNO",
+        metrics_dict={
+            "Test_RMSE": f"{test_rmse:.6e}"
+        },
+        csv_path=os.path.join(os.path.dirname(__file__), '../leaderboard_metrics.csv')
+    )
 
 
 if __name__ == "__main__":

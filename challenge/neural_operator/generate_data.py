@@ -166,7 +166,7 @@ def main():
     TEST_SAMPLES = 100
     
     # Create output directory
-    output_dir = "datasets/Poisson_Fourier"
+    output_dir = "datasets/Reaction_Diffusion"
     os.makedirs(output_dir, exist_ok=True)
     
     # Set random seed for reproducibility
