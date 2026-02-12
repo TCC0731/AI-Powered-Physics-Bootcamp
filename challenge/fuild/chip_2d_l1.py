@@ -150,7 +150,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the 2D chip flow solver.
     """
     # Define the Navier-Stokes equations (2D steady-state)
-    ns = NavierStokes()
+    ns = NavierStokes( FIXME ) # check tutorial 4
     normal_dot_vel = NormalDotVec(["u", "v"])
     
     # Create neural network for flow field (u, v, p)

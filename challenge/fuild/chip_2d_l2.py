@@ -153,7 +153,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the 2D multi-block flow solver.
     """
     # Define the Navier-Stokes equations (2D steady-state)
-    ns = NavierStokes()
+    ns = NavierStokes( FIXME ) # Fill in: same as Level 1
     normal_dot_vel = NormalDotVec(["u", "v"])
     
     # Create neural network for flow field (u, v, p)

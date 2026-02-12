@@ -80,10 +80,12 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Create datasets
     # Hint: use DictGridDataset
+    # Hint: https://github.com/NVIDIA/physicsnemo-sym/blob/main/examples/darcy/darcy_FNO.py line 60-63
     FIXME
     
     # Create FNO model
     # Hint: use instantiate_arch
+    # Hint: https://github.com/NVIDIA/physicsnemo-sym/blob/main/examples/darcy/darcy_FNO.py line 64-69
     FIXME
     
     print(f"FNO model created successfully")
