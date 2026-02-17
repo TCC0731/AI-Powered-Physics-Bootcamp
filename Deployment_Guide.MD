@@ -51,4 +51,4 @@ Then, open the jupyter lab in browser: http://localhost:8888
 Start working on the lab by clicking on the `Start_Here.ipynb` notebook.
 
 ### Known issues
-- Please go through the list of exisiting bugs/issues or file a new issue at [Github](https://github.com/openhackathons-org/Bootcamp-physicsnemo/issues).
+- Please go through the list of exisiting bugs/issues or file a new issue at [Github](https://github.com/openhackathons-org/AI-Powered-Physics-Bootcamp/issues).
