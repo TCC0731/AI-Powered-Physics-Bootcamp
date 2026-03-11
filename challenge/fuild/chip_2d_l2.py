@@ -153,7 +153,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the 2D multi-block flow solver.
     """
     # Define the Navier-Stokes equations (2D steady-state)
-    ns = NavierStokes( FIXME ) # Fill in: same as Level 1
+    ns = NavierStokes(nu=0.02, rho=1.0, dim=2, time=False) # Fill in: same as Level 1
     normal_dot_vel = NormalDotVec(["u", "v"])
     
     # Create neural network for flow field (u, v, p)
@@ -186,21 +186,24 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Block 1: Upstream block (larger, medium height), position (-1.0, bottom), size (0.6 × 0.4)
     block1 = Rectangle(
-        FIXME # Fill in: (x_start, y_start), (x_end, y_end)
+        (-1.0, channel_width[0]), 
+        (-0.4, channel_width[0] + 0.4) # Fill in: (x_start, y_start), (x_end, y_end)
     )
     
     # Block 2: Middle block (medium width, tallest), position (0.2, bottom), size (0.5 × 0.5)
     block2 = Rectangle(
-        FIXME # Fill in: (x_start, y_start), (x_end, y_end)
+        (0.2, channel_width[0]), 
+        (0.3, channel_width[0] + 0.5) # Fill in: (x_start, y_start), (x_end, y_end)
     )
     
     # Block 3: Downstream block (smallest) position (1.2, bottom), size (0.4 × 0.35)
     block3 = Rectangle(
-        FIXME # Fill in: (x_start, y_start), (x_end, y_end)
+        (1.2, channel_width[0]), 
+        (1.6, channel_width[0] + 0.35) # Fill in: (x_start, y_start), (x_end, y_end)
     )
     
     # Create final geometry by subtracting all blocks from channel
-    geo = FIXME # Fill in: channel minus all three blocks
+    geo = channel - block1 - block2 - block3 # Fill in: channel minus all three blocks
 
     
     # Define inlet and outlet lines
@@ -238,7 +241,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=inlet,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "u": inlet_parabola, # Fill in: Add inlet boundary condition here for "u" and "v", Hint: u is parabolic defined above and v is 0
+            "v": 0, # Fill in: same as Level 1    
         },
         batch_size=cfg.batch_size.inlet,
     )
@@ -249,7 +253,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=outlet,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "p": 0,  # Fill in: same as Level 1    
         },
         batch_size=cfg.batch_size.outlet,
         criteria=Eq(x, channel_length[1]),
@@ -261,7 +265,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "u": 0, # Fill in: Add no slip boundary condition here    
+            "v": 0, # Fill in: same as Level 1    
         },
         batch_size=cfg.batch_size.no_slip,
     )
@@ -274,7 +279,9 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "continuity": 0, # Fill in: Add PDE constraint here    
+            "momentum_x": 0,
+            "momentum_y": 0, # Fill in: same as Level 1    
         },
         batch_size=cfg.batch_size.interior,
         lambda_weighting={

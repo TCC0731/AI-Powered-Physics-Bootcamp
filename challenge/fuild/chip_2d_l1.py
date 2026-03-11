@@ -150,7 +150,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the 2D chip flow solver.
     """
     # Define the Navier-Stokes equations (2D steady-state)
-    ns = NavierStokes( FIXME ) # check tutorial 4
+    ns = NavierStokes(nu=0.02, rho=1.0, dim=2, time=False) # check tutorial 4
     normal_dot_vel = NormalDotVec(["u", "v"])
     
     # Create neural network for flow field (u, v, p)
@@ -224,7 +224,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=inlet,
         outvar={
-            FIXME # Fill in: Add inlet boundary condition here for "u" and "v", Hint: u is parabolic defined above and v is 0
+            "u": inlet_parabola, # Fill in: Add inlet boundary condition here for "u" and "v", Hint: u is parabolic defined above and v is 0
+            "v": 0,
         },
         batch_size=cfg.batch_size.inlet,
     )
@@ -235,7 +236,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=outlet,
         outvar={
-            FIXME # Fill in: Add outlet boundary condition here for "p"    
+            "p": 0, # Fill in: Add outlet boundary condition here for "p"    
         },
         batch_size=cfg.batch_size.outlet,
         criteria=Eq(x, channel_length[1]),
@@ -247,7 +248,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add no slip boundary condition here    
+            "u": 0, # Fill in: Add no slip boundary condition here    
+            "v": 0,
         },
         batch_size=cfg.batch_size.no_slip,
     )
@@ -259,7 +261,9 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add PDE constraint here    
+            "continuity": 0, # Fill in: Add PDE constraint here    
+            "momentum_x": 0,
+            "momentum_y": 0,
         },
         batch_size=cfg.batch_size.interior,
         lambda_weighting={

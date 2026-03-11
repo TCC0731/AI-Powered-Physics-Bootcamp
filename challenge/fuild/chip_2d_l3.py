@@ -171,12 +171,12 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the 2D unsteady flow solver.
     """
     # Define UNSTEADY Navier-Stokes equations (time=True enables time derivatives)
-    ns = NavierStokes( FIXME ) # Fill in : Correct variables for UNSTEADY Navier-Stokes equations
+    ns = NavierStokes(nu=0.02, rho=1.0, dim=2, time=True) # Fill in : Correct variables for UNSTEADY Navier-Stokes equations
     normal_dot_vel = NormalDotVec(["u", "v"])
     
     # Create neural network with TIME as input: (x, y, t) -> (u, v, p)
     flow_net = instantiate_arch(
-        input_keys=[FIXME, FIXME, FIXME],  # Fill in: Input for UNSTEADY Navier-Stokes equations
+        input_keys=[Key("x"), Key("y"), Key("t")],  # Fill in: Input for UNSTEADY Navier-Stokes equations
         output_keys=[Key("u"), Key("v"), Key("p")],
         cfg=cfg.arch.fully_connected,
     )
@@ -248,7 +248,9 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add Initial Condition here    
+            "u": 0, # Fill in: Add Initial Condition here    
+            "v": 0,
+            "p": 0,
         },
         batch_size=cfg.batch_size.IC,
         parameterization={t: 0},  # Fix time at t=0
@@ -261,7 +263,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=inlet,
         outvar={
-            FIXME # Fill in: same as Level 1     
+            "u": inlet_parabola, # Fill in: Add inlet boundary condition here for "u" and "v", Hint: u is parabolic defined above and v is 0
+            "v": 0, # Fill in: same as Level 1     
         },
         batch_size=cfg.batch_size.inlet,
         parameterization=time_range,  # Sample over all times
@@ -273,7 +276,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=outlet,
         outvar={
-            FIXME # Fill in: same as Level 1     
+            "p": 0, # Fill in: same as Level 1     
         },
         batch_size=cfg.batch_size.outlet,
         criteria=Eq(x, channel_length[1]),
@@ -286,7 +289,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1     
+            "u": 0, # Fill in: Add no slip boundary condition here    
+            "v": 0, # Fill in: same as Level 1     
         },
         batch_size=cfg.batch_size.no_slip,
         parameterization=time_range,  # Sample over all times
@@ -299,7 +303,9 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1     
+            "continuity": 0, # Fill in: Add PDE constraint here    
+            "momentum_x": 0,
+            "momentum_y": 0, # Fill in: same as Level 1     
         },
         batch_size=cfg.batch_size.interior,
         lambda_weighting={
