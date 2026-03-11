@@ -9,17 +9,17 @@
         <DataArray type="Float32" Name="area" format="binary" RangeMin="0.10000000149011612" RangeMax="0.10000000149011612">
           AQAAAACAAAAoAAAADwAAAA==eAE7e+aM7VkiMAAkcBpV
         </DataArray>
-        <DataArray type="Float32" Name="D1" format="binary" RangeMin="5.584609508514404" RangeMax="22.313743591308594">
-          AQAAAACAAAAoAAAAMQAAAA==eAFLX9vk+OKHoOPuF06ORi3ujj1Nmxzlt25ycP2r53hZlc/R+a2io4ZgmiMAedoQnw==
+        <DataArray type="Float32" Name="D1" format="binary" RangeMin="5.709848880767822" RangeMax="23.670642852783203">
+          AQAAAACAAAAoAAAAMQAAAA==eAET3b7N4Velj2NTyS8HRuNMx97+5w61XU8dqmL3OhZ7hzjOz13v2LFc1REAeYUR+Q==
         </DataArray>
-        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="-0.00850836280733347" RangeMax="0.04275878518819809">
-          AQAAAACAAAAoAAAAMQAAAA==eAELsvy3e03bPhuG8EALD9tlu9Z43LO5pqxvG/5HzUZHcZvNmu4Gm5Vp3HsAbusRZg==
+        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="-0.10613186657428741" RangeMax="0.07135139405727386">
+          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/64gkj0KLMe9x3mFvKpb2b0kAwM6kq/0OiJQrL16Y8y9YrmvvZo1ir2HTRQl
         </DataArray>
         <DataArray type="Float32" Name="true_u_1" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAoAAAADAAAAA==eAFjYCAOAAAAKAAB
         </DataArray>
-        <DataArray type="Float32" Name="pred_u_1" format="binary" RangeMin="-0.00850836280733347" RangeMax="0.04275878518819809">
-          AQAAAACAAAAoAAAAMQAAAA==eAELsvy3e03bPhuG8EALD9tlu9Z43LO5pqxvG/5HzUZHcZvNmu4Gm5Vp3HsAbusRZg==
+        <DataArray type="Float32" Name="pred_u_1" format="binary" RangeMin="-0.10613186657428741" RangeMax="0.07135139405727386">
+          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/64gkj0KLMe9x3mFvKpb2b0kAwM6kq/0OiJQrL16Y8y9YrmvvZo1ir2HTRQl
         </DataArray>
         <DataArray type="Float32" Name="lambda_u_1" format="binary" RangeMin="1" RangeMax="1">
           AQAAAACAAAAoAAAADwAAAA==eAFjYGiwZyACAwCS6gd3

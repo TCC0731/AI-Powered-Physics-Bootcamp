@@ -9,14 +9,14 @@
         <DataArray type="Float32" Name="area" format="binary" RangeMin="0.5" RangeMax="0.5">
           AQAAAACAAAAIAAAADgAAAA==eAFjYGCwZwBiAAGCAH8=
         </DataArray>
-        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.00021295668557286263" RangeMax="0.00021295668557286263">
-          AQAAAACAAAAIAAAADgAAAA==eAFT8I23VABiAAjYAgs=
+        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.0003745469730347395" RangeMax="0.0003745469730347395">
+          AQAAAACAAAAIAAAADwAAAA==eAG7EXfE8gYQAwAVSgRn
         </DataArray>
         <DataArray type="Float32" Name="true_u_1" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAIAAAACwAAAA==eAFjYIAAAAAIAAE=
         </DataArray>
-        <DataArray type="Float32" Name="pred_u_1" format="binary" RangeMin="0.00021295668557286263" RangeMax="0.00021295668557286263">
-          AQAAAACAAAAIAAAADgAAAA==eAFT8I23VABiAAjYAgs=
+        <DataArray type="Float32" Name="pred_u_1" format="binary" RangeMin="0.0003745469730347395" RangeMax="0.0003745469730347395">
+          AQAAAACAAAAIAAAADwAAAA==eAG7EXfE8gYQAwAVSgRn
         </DataArray>
         <DataArray type="Float32" Name="lambda_u_1" format="binary" RangeMin="1" RangeMax="1">
           AQAAAACAAAAIAAAADgAAAA==eAFjYGiwZwBiAAWCAX8=

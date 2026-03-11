@@ -9,23 +9,23 @@
         <DataArray type="Float32" Name="area" format="binary" RangeMin="0.5" RangeMax="0.5">
           AQAAAACAAAAIAAAADgAAAA==eAFjYGCwZwBiAAGCAH8=
         </DataArray>
-        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.9901748299598694" RangeMax="0.9901748299598694">
-          AQAAAACAAAAIAAAADgAAAA==eAGTrKm1lwRiAAtuAqM=
+        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.9905649423599243" RangeMax="0.9905649423599243">
+          AQAAAACAAAAIAAAADwAAAA==eAFbNbXWfhUQAwATNAP3
         </DataArray>
-        <DataArray type="Float32" Name="u_2" format="binary" RangeMin="1.01175856590271" RangeMax="1.01175856590271">
-          AQAAAACAAAAIAAAADgAAAA==eAHza2y09wNiAA48Ax8=
+        <DataArray type="Float32" Name="u_2" format="binary" RangeMin="0.9548436999320984" RangeMax="0.9548436999320984">
+          AQAAAACAAAAIAAAADgAAAA==eAFbXFBivxiIAREmA40=
         </DataArray>
-        <DataArray type="Float32" Name="diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="-0.021583735942840576" RangeMax="-0.021583735942840576">
-          AQAAAACAAAAIAAAADwAAAA==eAFLuLBhTwIQAwAWkAU5
+        <DataArray type="Float32" Name="diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.03572124242782593" RangeMax="0.03572124242782593">
+          AQAAAACAAAAIAAAADgAAAA==eAErCBCyLQBiAApmAh8=
         </DataArray>
-        <DataArray type="Float32" Name="u_1__x" format="binary" RangeMin="0.9898456335067749" RangeMax="0.9898456335067749">
-          AQAAAACAAAAIAAAADgAAAA==eAFrS6u1bwNiAA+uA1E=
+        <DataArray type="Float32" Name="u_1__x" format="binary" RangeMin="0.9901589751243591" RangeMax="0.9901589751243591">
+          AQAAAACAAAAIAAAADgAAAA==eAHjr6615wdiAArsAo0=
         </DataArray>
-        <DataArray type="Float32" Name="u_2__x" format="binary" RangeMin="99.00751495361328" RangeMax="99.00751495361328">
-          AQAAAACAAAAIAAAADwAAAA==eAG7yXzM6SYQAwASDgPJ
+        <DataArray type="Float32" Name="u_2__x" format="binary" RangeMin="98.97893524169922" RangeMax="98.97893524169922">
+          AQAAAACAAAAIAAAADgAAAA==eAEz/3rUyRyIARPiBGc=
         </DataArray>
-        <DataArray type="Float32" Name="diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="-0.0022954940795898438" RangeMax="-0.0022954940795898438">
-          AQAAAACAAAAIAAAADgAAAA==eAFjKBDbzQDEAAl6AoM=
+        <DataArray type="Float32" Name="diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0.0036954879760742188" RangeMax="0.0036954879760742188">
+          AQAAAACAAAAIAAAADgAAAA==eAFjMCiyZgBiAAbaAbs=
         </DataArray>
         <DataArray type="Float32" Name="true_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAIAAAACwAAAA==eAFjYIAAAAAIAAE=
@@ -33,11 +33,11 @@
         <DataArray type="Float32" Name="true_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAIAAAACwAAAA==eAFjYIAAAAAIAAE=
         </DataArray>
-        <DataArray type="Float32" Name="pred_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="-0.021583735942840576" RangeMax="-0.021583735942840576">
-          AQAAAACAAAAIAAAADwAAAA==eAFLuLBhTwIQAwAWkAU5
+        <DataArray type="Float32" Name="pred_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.03572124242782593" RangeMax="0.03572124242782593">
+          AQAAAACAAAAIAAAADgAAAA==eAErCBCyLQBiAApmAh8=
         </DataArray>
-        <DataArray type="Float32" Name="pred_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="-0.0022954940795898438" RangeMax="-0.0022954940795898438">
-          AQAAAACAAAAIAAAADgAAAA==eAFjKBDbzQDEAAl6AoM=
+        <DataArray type="Float32" Name="pred_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0.0036954879760742188" RangeMax="0.0036954879760742188">
+          AQAAAACAAAAIAAAADgAAAA==eAFjMCiyZgBiAAbaAbs=
         </DataArray>
         <DataArray type="Float32" Name="lambda_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="1" RangeMax="1">
           AQAAAACAAAAIAAAADgAAAA==eAFjYGiwZwBiAAWCAX8=

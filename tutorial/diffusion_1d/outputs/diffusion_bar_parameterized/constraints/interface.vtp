@@ -9,26 +9,26 @@
         <DataArray type="Float32" Name="area" format="binary" RangeMin="0.10000000149011612" RangeMax="0.10000000149011612">
           AQAAAACAAAAoAAAADwAAAA==eAE7e+aM7VkiMAAkcBpV
         </DataArray>
-        <DataArray type="Float32" Name="D1" format="binary" RangeMin="6.519649028778076" RangeMax="24.97559356689453">
-          AQAAAACAAAAoAAAAMQAAAA==eAFL6+lxNL222TFiCo9jRqiP46KETkfZeBPHrav6HFnOHXfULX7s8H3BBQcAUP4RcQ==
+        <DataArray type="Float32" Name="D1" format="binary" RangeMin="7.273119926452637" RangeMax="20.7910099029541">
+          AQAAAACAAAAoAAAAMQAAAA==eAGLiox0XK/wyuHgjEbHKGMLx7S9LxwEa3gdm6VmON68l+v4N3iZo/dMD0cAWTYRDQ==
         </DataArray>
-        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.44229206442832947" RangeMax="1.5504748821258545">
-          AQAAAACAAAAoAAAAMQAAAA==eAHbKi1g//vqezvfn5Psf6q52ceqCtsfnZpk/zSWz1665JGdE9s2+2+lx+wBcNoRkg==
+        <DataArray type="Float32" Name="u_1" format="binary" RangeMin="0.39213883876800537" RangeMax="1.3425184488296509">
+          AQAAAACAAAAoAAAAMQAAAA==eAHb/lbJnmnNKvtFjCz23vvd7ZdeX21fkdtpn2dwx+6BvpB9zrETdgpvje0BXBgQ9Q==
         </DataArray>
-        <DataArray type="Float32" Name="u_2" format="binary" RangeMin="-0.4756785035133362" RangeMax="1.1947407722473145">
-          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/wV5D75C34u+Jx1aPyu9ST4UMXW9lgvkPijw5rwijPO+JtqMP0TtmD9T8BIo
+        <DataArray type="Float32" Name="u_2" format="binary" RangeMin="0.11767525970935822" RangeMax="1.289703130722046">
+          AQAAAACAAAAoAAAAMQAAAA==eAHzrzplFzd9gb2ttb0de7SM/T+RpfYR2R32e/3c7N6XzbDb9f+DbbvdVTsAR3kRYA==
         </DataArray>
-        <DataArray type="Float32" Name="diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.29622572660446167" RangeMax="0.9179705381393433">
-          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX//b5Mz+e2j0/5qqXPq63Ez9ueCI/9B/hPmaVFT8eAGs/cLCkPsgitj6ORRHi
+        <DataArray type="Float32" Name="diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.007877349853515625" RangeMax="0.3289005160331726">
+          AQAAAACAAAAoAAAAMQAAAA==eAGzO1Rm5+C10HZZ6go7gYm6dg9CImwZBBht5IWK7C6+6Lara+ux2zl7kh0AMfIPhQ==
         </DataArray>
-        <DataArray type="Float32" Name="u_1__x" format="binary" RangeMin="0.4041728973388672" RangeMax="1.5187042951583862">
-          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/6aaED/jk+I+NM2PPzG+Rj8f5RM/z59gP31kDj/A784+sVyyP+dkwj99UBL/
+        <DataArray type="Float32" Name="u_1__x" format="binary" RangeMin="0.48098963499069214" RangeMax="1.3430455923080444">
+          AQAAAACAAAAoAAAAMQAAAA==eAHj2mdj3/JhlX2gm5w9Q3es/esXq+0np/XZdy9mszeYpWPv5vLNbrGsjz0AT5kP8A==
         </DataArray>
-        <DataArray type="Float32" Name="u_2__x" format="binary" RangeMin="98.24079895019531" RangeMax="99.86809539794922">
-          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/61qxkIXfcdCJg3GQv22xULHU8ZCIM7FQll7xkJ3vMdC51HFQkp7xEKS5xPr
+        <DataArray type="Float32" Name="u_2__x" format="binary" RangeMin="97.4599838256836" RangeMax="99.55937957763672">
+          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX/8aSxUI5/MJCAC/GQn5DxUKD68JCbXTEQhnTxkK53cVCZx7HQpdwxUKfHBQe
         </DataArray>
-        <DataArray type="Float32" Name="diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="-0.03169441223144531" RangeMax="0.10764789581298828">
-          AQAAAACAAAAoAAAAMQAAAA==eAFjcHCwZphwYw/DJca9DPte2zBs6LZmcFhlxTBj7u6Gsju2DIGytg3J82wBM/4PVw==
+        <DataArray type="Float32" Name="diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0.014910697937011719" RangeMax="0.1367053985595703">
+          AQAAAACAAAAoAAAAMQAAAA==eAFr+MNtx5C00YbhwU3bhoQztgwBW20YfEpsGC7m2R5oYLVj6Da1bbj1zxYAQMwPwg==
         </DataArray>
         <DataArray type="Float32" Name="true_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAoAAAADAAAAA==eAFjYCAOAAAAKAAB
@@ -36,11 +36,11 @@
         <DataArray type="Float32" Name="true_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0" RangeMax="0">
           AQAAAACAAAAoAAAADAAAAA==eAFjYCAOAAAAKAAB
         </DataArray>
-        <DataArray type="Float32" Name="pred_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.29622572660446167" RangeMax="0.9179705381393433">
-          AQAAAACAAAAoAAAAMwAAAA==eAEBKADX//b5Mz+e2j0/5qqXPq63Ez9ueCI/9B/hPmaVFT8eAGs/cLCkPsgitj6ORRHi
+        <DataArray type="Float32" Name="pred_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="0.007877349853515625" RangeMax="0.3289005160331726">
+          AQAAAACAAAAoAAAAMQAAAA==eAGzO1Rm5+C10HZZ6go7gYm6dg9CImwZBBht5IWK7C6+6Lara+ux2zl7kh0AMfIPhQ==
         </DataArray>
-        <DataArray type="Float32" Name="pred_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="-0.03169441223144531" RangeMax="0.10764789581298828">
-          AQAAAACAAAAoAAAAMQAAAA==eAFjcHCwZphwYw/DJca9DPte2zBs6LZmcFhlxTBj7u6Gsju2DIGytg3J82wBM/4PVw==
+        <DataArray type="Float32" Name="pred_diffusion_interface_neumann_u_1_u_2" format="binary" RangeMin="0.014910697937011719" RangeMax="0.1367053985595703">
+          AQAAAACAAAAoAAAAMQAAAA==eAFr+MNtx5C00YbhwU3bhoQztgwBW20YfEpsGC7m2R5oYLVj6Da1bbj1zxYAQMwPwg==
         </DataArray>
         <DataArray type="Float32" Name="lambda_diffusion_interface_dirichlet_u_1_u_2" format="binary" RangeMin="1" RangeMax="1">
           AQAAAACAAAAoAAAADwAAAA==eAFjYGiwZyACAwCS6gd3
