@@ -1,3 +1,11 @@
 Metric_Name,Metric_Value
-L1_Wave_PDE_Residue_RMSE,9.027668e-03
-L1_Wave_Validation_RMSE,7.463282e-02
+L1_FNO_Test_RMSE,1.440799e+01
+L1_Wave_PDE_Residue_RMSE,3.989226e-03
+L1_Wave_Validation_RMSE,7.372347e-02
+L2_FNO_Test_RMSE,5.319901e+00
+L2_Wave_IC_Validation_RMSE,3.340859e-03
+L2_Wave_PDE_Residue_RMSE,3.634579e-03
+L3_FNO_PDE_Residue_RMSE,3.394435e+03
+L3_FNO_Test_RMSE,7.940615e+01
+L3_Wave_IC_Validation_RMSE,4.833321e-02
+L3_Wave_PDE_Residue_RMSE,8.326387e-02

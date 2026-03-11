@@ -24,7 +24,7 @@ defaults :
   - /arch/fno_cfg@arch.fno
   - scheduler: tf_exponential_lr
   - optimizer: adam
-  - loss: sum
+  - loss: grad_norm
   - _self_
 
 arch:

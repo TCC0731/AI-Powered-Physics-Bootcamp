@@ -182,21 +182,21 @@ class CoupledAtmosOcean2D(PDE):
         # atm: Ta_t + u Ta_x + v Ta_y - ka*(Ta_xx+Ta_yy) - Qa + lam*(Ta-Teq_a) + gamma*(Ta-To) = 0
         # ocn: To_t - ko*(To_xx+To_yy) - Qo - gamma*(Ta-To) = 0
         self.equations = {}
-        self.equations["atm"] = FIXME # Fill in atmospheric residue
-        self.equations["ocn"] = FIXME # Fill in ocean residue
+        self.equations["atm"] = Ta.diff(t) + u*Ta.diff(x) + v*Ta.diff(y) - ka*(Ta.diff(x, 2) + Ta.diff(y, 2)) - Qa + lam*(Ta - Teq_a) + gamma*(Ta - To) # Fill in atmospheric residue
+        self.equations["ocn"] = To.diff(t) - ko*(To.diff(x, 2) + To.diff(y, 2)) - Qo - gamma*(Ta - To) # Fill in ocean residue
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_coupled")
 def run_coupled(cfg: PhysicsNeMoConfig) -> None:
     # Parameters for validation case (decoupled)
-    u0 = FIXME # Fill in
-    v0 = FIXME # Fill in
-    kappa_a = FIXME # Fill in
-    kappa_o = FIXME # Fill in
-    lam_a = FIXME # Fill in
-    Q_a0 = FIXME # Fill in
-    Q_o0 = FIXME # Fill in
-    Teq_a0 = FIXME # Fill in
-    gamma0 = FIXME # Fill in
+    u0 = 0 # Fill in
+    v0 = 0 # Fill in
+    kappa_a = 1 # Fill in
+    kappa_o = 0.5 # Fill in
+    lam_a = 0 # Fill in
+    Q_a0 = 0 # Fill in
+    Q_o0 = 0 # Fill in
+    Teq_a0 = 0 # Fill in
+    gamma0 = 0 # Fill in
 
     pde = CoupledAtmosOcean2D(
         u0=u0, v0=v0, kappa_a=kappa_a, kappa_o=kappa_o,
@@ -225,7 +225,8 @@ def run_coupled(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add initial condition here for "Ta", "To"
+            "Ta": sin(x)*sin(y),  # Fill in: Add initial condition here for "Ta", "To"
+            "To": sin(x)*sin(y),
         },
         batch_size=cfg.batch_size.IC,
         lambda_weighting={"Ta": 1.0, "To": 1.0},
@@ -238,7 +239,8 @@ def run_coupled(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add boundary condition here for "Ta", "To"
+            "Ta": 0, # Fill in: Add boundary condition here for  "Ta", "To"
+            "To": 0,
         },
         lambda_weighting={"Ta": 1.0, "To": 1.0},
         batch_size=cfg.batch_size.BC,
@@ -251,7 +253,8 @@ def run_coupled(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add PDE constraints here
+            "atm":0 , # Fill in: Add PDE constraints here
+            "ocn":0,
         },
         batch_size=cfg.batch_size.interior,
         parameterization=time_range,
@@ -271,8 +274,8 @@ def run_coupled(cfg: PhysicsNeMoConfig) -> None:
     TT = np.expand_dims(TT.flatten(), axis=-1)
 
     # Fill in: exact solutions
-    Ta_true = FIXME # Fill in: Exact Ta
-    To_true = FIXME # Fill in: Exact To
+    Ta_true = np.sin(X)*np.sin(Y)*np.exp(-2.0*kappa_a*TT) # Fill in: Exact Ta
+    To_true = np.sin(X)*np.sin(Y)*np.exp(-2.0*kappa_o*TT) # Fill in: Exact To
 
     invar_numpy = {"x": X, "y": Y, "t": TT}
     outvar_numpy = {"Ta": Ta_true, "To": To_true}

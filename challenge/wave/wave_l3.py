@@ -165,13 +165,13 @@ class WaveEquation2D(PDE):
         # Define the wave equation: u_tt = c^2 * (u_xx + u_yy)
         self.equations = {}
         self.equations["wave_equation"] = (
-            FIXME # Fill in: same as Level 1
+            u.diff(t,2) - c**2 * (u.diff(x,2) + u.diff(y,2)) # Fill in: same as Level 1
         )
         
         # Add Robin boundary condition: alpha*u + beta*(du/dn) = 0
         # For a circle centered at origin, the outward normal is (x/R, y/R)
         # So du/dn = u_x * (x/R) + u_y * (y/R)
-        self.equations["robin_bc"] = FIXME # Fill in: Robin boundary condition: alpha*u + beta*(du/dn)
+        self.equations["robin_bc"] = alpha * u + beta * (u.diff(x,1) * x/R + u.diff(y,1) * y/R) # Fill in: Robin boundary condition: alpha*u + beta*(du/dn)
 
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_wave")
@@ -211,7 +211,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: two Gaussian sources for "u" and "u__t"
+            "u": exp(-20*((x-0.3)**2 + y**2)) + exp(-20*((x+0.3)**2 + y**2)),
+            "u__t": 0.0 # Fill in: two Gaussian sources for "u" and "u__t"
         },
         batch_size=cfg.batch_size.IC,
         lambda_weighting={"u": 1.0, "u__t": 1.0},
@@ -225,7 +226,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Set robin_bc to 0
+            "robin_bc": 0.0 # Fill in: Set robin_bc to 0
         },
         lambda_weighting={"robin_bc": 1.0},
         batch_size=cfg.batch_size.BC,
@@ -238,7 +239,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "wave_equation": 0.0 # Fill in: same as Level 1    
         },
         batch_size=cfg.batch_size.interior,
         parameterization=time_range,

@@ -136,18 +136,18 @@ class SimpleAtmosphere2D(PDE):
         # PDE residual: T_t + u*T_x + v*T_y - k*(T_xx + T_yy) - Q + lam*(T - Teq) = 0
         self.equations = {}
         # Hint: Define the ADR residual using T.diff(...)
-        self.equations["adr"] = FIXME # Fill in residual expression
+        self.equations["adr"] = T.diff(t) + u*T.diff(x) + v*T.diff(y) - k*(T.diff(x, 2) + T.diff(y, 2)) - Q + lam*(T - Teq) # Fill in residual expression
 
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_atmos")
 def run(cfg: PhysicsNeMoConfig) -> None:
     # Parameters for exact-solution case
-    u0 = FIXME # Fill in
-    v0 = FIXME # Fill in
-    kappa = FIXME # Fill in
-    lam = FIXME # Fill in
-    Q0 = FIXME # Fill in
-    Teq_val = FIXME # Fill in
+    u0 = 0 # Fill in
+    v0 = 0 # Fill in
+    kappa = 1 # Fill in
+    lam = 0 # Fill in
+    Q0 = 0 # Fill in
+    Teq_val = 0 # Fill in
 
     pde = SimpleAtmosphere2D(u0=u0, v0=v0, kappa=kappa, lam=lam, Q0=Q0, Teq=Teq_val)
 
@@ -175,7 +175,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # # Fill in: Add initial condition here for "T"
+            "T": sin(x)*sin(y) # # Fill in: Add initial condition here for "T"
         },
         batch_size=cfg.batch_size.IC,
         lambda_weighting={"T": 1.0},
@@ -188,7 +188,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add boundary condition here for "T"
+            "T": 0.0 # Fill in: Add boundary condition here for "T"
         },
         lambda_weighting={"T": 1.0},
         batch_size=cfg.batch_size.BC,
@@ -201,7 +201,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add PDE constraint here
+            "adr": 0.0 # Fill in: Add PDE constraint here
         },
         batch_size=cfg.batch_size.interior,
         parameterization=time_range,
@@ -221,7 +221,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     TT = np.expand_dims(TT.flatten(), axis=-1)
 
     # Exact: T(x,y,t) = sin(x) sin(y) exp(-2*kappa*t)
-    T_true = FIXME # Fill in: Exact T
+    T_true = np.sin(X)*np.sin(Y)*np.exp(-2*kappa*TT) # Fill in: Exact T
 
     invar_numpy = {"x": X, "y": Y, "t": TT}
     outvar_numpy = {"T": T_true}

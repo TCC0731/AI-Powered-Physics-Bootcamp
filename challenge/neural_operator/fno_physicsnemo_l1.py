@@ -68,12 +68,12 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Load data
     invar_train, outvar_train = load_dataset(
-        FIXME, 
+        train_file, 
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     invar_test, outvar_test = load_dataset(
-        FIXME,
+        test_file,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
@@ -81,16 +81,28 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     # Create datasets
     # Hint: use DictGridDataset
     # Hint: https://github.com/NVIDIA/physicsnemo-sym/blob/main/examples/darcy/darcy_FNO.py line 60-63
-    FIXME
+    train_dataset = DictGridDataset(invar_train, outvar_train)
+    test_dataset = DictGridDataset(invar_test, outvar_test)
     
     # Create FNO model
     # Hint: use instantiate_arch
     # Hint: https://github.com/NVIDIA/physicsnemo-sym/blob/main/examples/darcy/darcy_FNO.py line 64-69
-    FIXME
+    decoder_net = instantiate_arch(
+        cfg=cfg.arch.decoder,
+        output_keys=output_keys,
+    )
+    
+    fno = instantiate_arch(
+        cfg=cfg.arch.fno,
+        input_keys=input_keys,
+        decoder_net=decoder_net,
+    )
     
     print(f"FNO model created successfully")
     print(f"  Input keys: {[k.name for k in input_keys]}")
     print(f"  Output keys: {[k.name for k in output_keys]}")
+
+    nodes = [decoder_net.make_node(name="decoder_net")] + [fno.make_node(name="fno")]
 
     # Make domain
     domain = Domain()

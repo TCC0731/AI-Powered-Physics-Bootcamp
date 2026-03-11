@@ -99,7 +99,7 @@ class ReactionDiffusionPDE(torch.nn.Module):
         u = input_var["u"]
         f = input_var["f"]
 
-        FIXME # Fill in the computation of pde_residual
+        pde_residual = u - self.finite_diff_laplacian(u) - f
 
         return {"pde_residual": pde_residual}
 
@@ -131,12 +131,12 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Load data (same as Level 1)
     invar_train, outvar_train = load_dataset(
-        FIXME, 
+        train_file, 
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     invar_test, outvar_test = load_dataset(
-        FIXME,
+        test_file,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
@@ -146,11 +146,21 @@ def run(cfg: PhysicsNeMoConfig) -> None:
 
     # Create datasets (same as Level 1)
     # Hint: use DictGridDataset
-    FIXME
+    train_dataset = DictGridDataset(invar_train, outvar_train)
+    test_dataset = DictGridDataset(invar_test, outvar_test)
 
     # Create FNO backbone for PINO
     # Hint: use instantiate_arch
-    FIXME
+    decoder_net = instantiate_arch(
+        cfg=cfg.arch.decoder,
+        output_keys=output_keys,
+    )
+    
+    fno = instantiate_arch(
+        cfg=cfg.arch.fno,
+        input_keys=input_keys,
+        decoder_net=decoder_net,
+    )
     
     print(f"FNO backbone created successfully")
 
@@ -164,7 +174,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         evaluate=ReactionDiffusionPDE(dx=dx),
         name="Reaction-Diffusion PDE Node",
     )
-    nodes = [fno.make_node("fno"), pde_node]
+    nodes = [decoder_net.make_node("decoder_net"), fno.make_node("fno"), pde_node]
     
     print(f"PINO nodes created:")
     print(f"  1. FNO (data-driven)")

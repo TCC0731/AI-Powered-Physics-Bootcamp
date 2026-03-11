@@ -85,12 +85,12 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Load data (same as Level 1)
     invar_train, outvar_train = load_dataset(
-        FIXME, 
+        train_file, 
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
     invar_test, outvar_test = load_dataset(
-        FIXME,
+        test_file,
         [k.name for k in input_keys],
         [k.name for k in output_keys],
     )
@@ -112,12 +112,20 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     
     # Create datasets (same as Level 1)
     # Hint: use DictGridDataset
-    FIXME
+    train_dataset = DictGridDataset(invar_train, outvar_train)
+    test_dataset = DictGridDataset(invar_test, outvar_test)
     
     # Create AFNO model
     # Hint: use instantiate_arch
-    FIXME
+    model = instantiate_arch(
+        cfg=cfg.arch.afno,
+        input_keys=input_keys,
+        output_keys=output_keys,
+        img_shape=img_shape,
+    )
 
+    nodes = [model.make_node(name="model")]
+    
     # Make domain
     domain = Domain()
 
