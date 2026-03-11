@@ -9,15 +9,18 @@ defaults :
 
 save_filetypes : "vtk,npz"
 
+amp:
+  enabled: true
+
 scheduler:
   decay_rate: 0.95
   decay_steps: 3000
 
 training:
-  rec_results_freq : 1000
+  rec_results_freq : 5000
   rec_constraint_freq: 5000
   max_steps : 50000
 
 batch_size:
-  initial_condition: 2048
-  interior: 2048
+  initial_condition: 8192
+  interior: 8192
