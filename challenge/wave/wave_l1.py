@@ -137,7 +137,7 @@ class WaveEquation2D(PDE):
         # Define the wave equation: u_tt = c^2 * (u_xx + u_yy)
         self.equations = {}
         self.equations["wave_equation"] = (
-           FIXME # Fill in: Add wave equation here
+           u.diff(t,2) - c**2 * (u.diff(x,2) + u.diff(y,2)) # Fill in: Add wave equation here
         )
 
 
@@ -147,7 +147,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     Main function to set up and run the wave equation solver.
     """
     # Initialize wave equation with constant wave speed
-    c = FIXME # Fill in: c value
+    c = 1.0 # Fill in: c value
     we = WaveEquation2D(c=c)
     
     # Create neural network
@@ -174,7 +174,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add two initial conditions here for "u" and "u__t"
+            'u' : sin(x)*sin(y), # Fill in: Add two initial conditions here for "u" and "u__t"
+            'u__t' : sin(x)*sin(y)
         },
         batch_size=cfg.batch_size.IC,
         lambda_weighting={"u": 1.0, "u__t": 1.0},
@@ -187,7 +188,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add boundary condition here for "u"
+            'u' : 0 # Fill in: Add boundary condition here for "u"
         }, 
         lambda_weighting={"u": 1.0},
         batch_size=cfg.batch_size.BC,
@@ -200,7 +201,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add PDE constraint here
+            'wave_equation' : 0 # Fill in: Add PDE constraint here
         },
         batch_size=cfg.batch_size.interior,
         parameterization=time_range,

@@ -145,7 +145,7 @@ class WaveEquation2DVarSpeed(PDE):
         # Define the wave equation: u_tt = c^2 * (u_xx + u_yy)
         self.equations = {}
         self.equations["wave_equation"] = (
-            FIXME # Fill in: same as Level 1
+            u.diff(t,2) - c**2 * (u.diff(x,2) + u.diff(y,2)) # Fill in: same as Level 1
         )
 
 @physicsnemo.sym.main(config_path="conf", config_name="config_wave")
@@ -169,8 +169,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     # Create a node for the wave speed function c(x, y)
     # c(x,y) = 1.0 + 0.5*sin(x)*cos(y)
     c_node = Node.from_sympy(
-        FIXME, # Fill in: create expression for c using sin and Symbol
-        "c"
+        1+0.5*sin(x)*cos(y), "c"
     )
     
     # Create nodes for the solver
@@ -190,7 +189,8 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: Add two initial conditions here 
+            "u" : sin(x)*sin(y),
+            "u__t" : 0.0
         },
         batch_size=cfg.batch_size.IC,
         lambda_weighting={"u": 1.0, "u__t": 1.0},
@@ -203,7 +203,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1    
+            "u" : 0.0
         },
         lambda_weighting={"u": 1.0},
         batch_size=cfg.batch_size.BC,
@@ -216,7 +216,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
         nodes=nodes,
         geometry=geo,
         outvar={
-            FIXME # Fill in: same as Level 1
+            "wave_equation" : 0.0
         },
         batch_size=cfg.batch_size.interior,
         parameterization=time_range,
