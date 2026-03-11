@@ -20,7 +20,7 @@ defaults :
       - fully_connected
   - scheduler: tf_exponential_lr
   - optimizer: adam
-  - loss: sum
+  - loss: grad_norm
   - _self_
 
 scheduler:

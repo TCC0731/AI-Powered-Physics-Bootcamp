@@ -190,7 +190,7 @@ def run(cfg: PhysicsNeMoConfig) -> None:
     wave_net = instantiate_arch(
         input_keys=[Key("x"), Key("y"), Key("t")],
         output_keys=[Key("u")],
-        cfg=cfg.arch.fully_connected,
+        cfg=cfg.arch.modified_fourier,
     )
     
     # Create nodes

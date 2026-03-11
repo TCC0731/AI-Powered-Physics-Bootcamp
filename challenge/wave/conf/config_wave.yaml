@@ -17,7 +17,7 @@
 defaults :
   - physicsnemo_default
   - arch:
-      - fully_connected
+      - modified_fourier
   - scheduler: tf_exponential_lr
   - optimizer: adam
   - loss: sum
